@@ -10,53 +10,51 @@ package yabdd.gherkin;
 
 feature: featHeader featBody;
 
-featHeader: SP* FEATURE restOfLine NL+ featDesc*;
-//featTitle: restOfLine;
-featDesc: ~(BACKGROUND | SCENARIO | OUTLINE_SCENARIO) restOfLine* NL+ ;
+featHeader: Space* Feature restOfLine NewLine+ featDesc*;
+featDesc: ~(Background | Scenario | ScenarioOutline) restOfLine* NewLine+ ;
 
 featBody: background? (scenario | outlineScenario)+;
 
-background: SP* BACKGROUND restOfLine NL+ blockDesc blockBody;
-blockDesc: (~GIVEN)*;
+background: Space* Background restOfLine NewLine+ blockDesc blockBody;
+blockDesc: (~Given)*;
 blockBody: given when then;
 
-scenario: SP* SCENARIO restOfLine NL+  blockDesc blockBody;
-outlineScenario: SP* OUTLINE_SCENARIO blockDesc blockBody;
+scenario: Space* Scenario restOfLine NewLine+  blockDesc blockBody;
+outlineScenario: Space* ScenarioOutline blockDesc blockBody;
 
 given: firstGiven moreGiven*;
-firstGiven: SP* GIVEN ruleBody;
-moreGiven: SP* (AND | BUT | GIVEN) ruleBody;
+firstGiven: Space* Given ruleBody;
+moreGiven: Space* (And | But | Given) ruleBody;
 
 when: firstWhen moreWhen*;
-firstWhen: SP* WHEN ruleBody;
-moreWhen: SP* (AND | BUT | WHEN) ruleBody;
+firstWhen: Space* When ruleBody;
+moreWhen: Space* (And | But | When) ruleBody;
 
 then: firstThen moreThen*;
-firstThen: SP* THEN ruleBody;
-moreThen: SP* (AND | BUT | THEN) ruleBody;
+firstThen: Space* Then ruleBody;
+moreThen: Space* (And | But | Then) ruleBody;
 
-ruleBody: ruleText (NL | EOF);
+ruleBody: ruleText (NewLine | EOF);
 ruleText: restOfLine;
 
-restOfLine: (WORD|SP)+;
+restOfLine: Space* Word (Word|Space)*;
 
 
 //tag:  '@' TAGNAME WS+;
 //TAGNAME: ~(WS|'@')+;
 
-Comment: SP* '#' .*? NL;
+Comment: Space* '#' .*? NewLine -> skip;
 
-SP : [ \t];
-NL : '\r'? '\n' | '\r';
-WORD: ~[ \t\r\n]+?;
-fragment White : SP | NL;
+Space : [ \t];
+NewLine : '\r'? '\n' | '\r';
+Word: ~[ \t\r\n]+?;
 
-AND: 'And ';
-BUT: 'But ';
-GIVEN: 'Given ';
-WHEN: 'When ';
-THEN: 'Then ';
-BACKGROUND: 'Background:';
-SCENARIO: 'Scenario:';
-OUTLINE_SCENARIO: 'Scenario Outline:';
-FEATURE: 'Feature:';
+And: 'And ';
+But: 'But ';
+Given: 'Given ';
+When: 'When ';
+Then: 'Then ';
+Background: 'Background:';
+Scenario: 'Scenario:';
+ScenarioOutline: 'Scenario Outline:';
+Feature: 'Feature:';

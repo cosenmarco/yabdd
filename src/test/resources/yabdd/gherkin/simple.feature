@@ -2,7 +2,7 @@ Feature: this is a test feature
   feat description
   Scenario: test scenario
   scenario description
-
+   #  Comment
     Given I have a rule
     When the rule is parsed
     Then I am happy
