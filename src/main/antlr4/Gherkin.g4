@@ -1,6 +1,6 @@
 // TODO Copyright note
 // https://github.com/cucumber/cucumber/wiki/Gherkin
-// https://github.com/cucumber/yabdd.gherkin/wiki/BNF
+// https://github.com/cucumber/gherkin/wiki/BNF
 
 grammar Gherkin;
 
@@ -11,16 +11,16 @@ package yabdd.gherkin;
 feature: featHeader featBody;
 
 featHeader: (Space | NewLine)* Tag* Feature restOfLine NewLine+ featDesc*;
-featDesc: ~(Background | Scenario | ScenarioOutline) restOfLine* NewLine+ ;
+featDesc: ~(Background | Scenario | ScenarioOutline) restOfLine NewLine+ ;
 
 featBody: background? (scenario | outlineScenario)+;
 
-background: (Space | NewLine)* Tag* Background restOfLine NewLine+ blockDesc blockBody;
-blockDesc: (~Given)*;
+background: (Space | NewLine)* Tag* Background restOfLine NewLine+ blockDesc* given;
+blockDesc: ~(Given) restOfLine NewLine+ ;
 blockBody: given when then;
 
-scenario: (Space | NewLine)* Tag* Scenario restOfLine NewLine+  blockDesc blockBody;
-outlineScenario: (Space | NewLine)* Tag* ScenarioOutline blockDesc blockBody;
+scenario: (Space | NewLine)* Tag* Scenario restOfLine NewLine+  blockDesc* blockBody;
+outlineScenario: (Space | NewLine)* Tag* ScenarioOutline restOfLine NewLine+ blockDesc* blockBody;
 
 given: firstGiven moreGiven*;
 firstGiven: (Space | NewLine)* Given ruleBody;
