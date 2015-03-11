@@ -10,44 +10,38 @@ package yabdd.gherkin;
 
 feature: featHeader featBody;
 
-featHeader: Space* Feature restOfLine NewLine+ featDesc*;
+featHeader: (Space | NewLine)* Tag* Feature restOfLine NewLine+ featDesc*;
 featDesc: ~(Background | Scenario | ScenarioOutline) restOfLine* NewLine+ ;
 
 featBody: background? (scenario | outlineScenario)+;
 
-background: Space* Background restOfLine NewLine+ blockDesc blockBody;
+background: (Space | NewLine)* Tag* Background restOfLine NewLine+ blockDesc blockBody;
 blockDesc: (~Given)*;
 blockBody: given when then;
 
-scenario: Space* Scenario restOfLine NewLine+  blockDesc blockBody;
-outlineScenario: Space* ScenarioOutline blockDesc blockBody;
+scenario: (Space | NewLine)* Tag* Scenario restOfLine NewLine+  blockDesc blockBody;
+outlineScenario: (Space | NewLine)* Tag* ScenarioOutline blockDesc blockBody;
 
 given: firstGiven moreGiven*;
-firstGiven: Space* Given ruleBody;
-moreGiven: Space* (And | But | Given) ruleBody;
+firstGiven: (Space | NewLine)* Given ruleBody;
+moreGiven: (Space | NewLine)* (And | But | Given) ruleBody;
 
 when: firstWhen moreWhen*;
-firstWhen: Space* When ruleBody;
-moreWhen: Space* (And | But | When) ruleBody;
+firstWhen: (Space | NewLine)* When ruleBody;
+moreWhen: (Space | NewLine)* (And | But | When) ruleBody;
 
 then: firstThen moreThen*;
-firstThen: Space* Then ruleBody;
-moreThen: Space* (And | But | Then) ruleBody;
+firstThen: (Space | NewLine)* Then ruleBody;
+moreThen: (Space | NewLine)* (And | But | Then) ruleBody;
 
 ruleBody: ruleText (NewLine | EOF);
 ruleText: restOfLine;
 
 restOfLine: Space* Word (Word|Space)*;
 
-
-//tag:  '@' TAGNAME WS+;
-//TAGNAME: ~(WS|'@')+;
-
+// Tokens
+Tag:  '@' WD (Space | NewLine)+;
 Comment: Space* '#' .*? NewLine -> skip;
-
-Space : [ \t];
-NewLine : '\r'? '\n' | '\r';
-Word: ~[ \t\r\n]+?;
 
 And: 'And ';
 But: 'But ';
@@ -58,3 +52,9 @@ Background: 'Background:';
 Scenario: 'Scenario:';
 ScenarioOutline: 'Scenario Outline:';
 Feature: 'Feature:';
+
+Space : [ \t];
+NewLine : '\r'? '\n' | '\r';
+Word: WD;
+
+fragment WD: ~[ \t\r\n]+?;

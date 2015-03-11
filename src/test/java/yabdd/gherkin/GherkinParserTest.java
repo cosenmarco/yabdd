@@ -47,6 +47,7 @@ public class GherkinParserTest {
     }
 
     private class SimpleListener extends GherkinBaseListener {
+        // Not nice but for tests it's ok
         private int scenario = 0;
 
         @Override
@@ -81,6 +82,37 @@ public class GherkinParserTest {
         ParseTree tree = parser.feature();
 
         GherkinListener testListener = new SimpleListener();
+        ParseTreeWalker walker = new ParseTreeWalker();
+        walker.walk(testListener, tree);
+    }
+
+    private class TaggedListener extends GherkinBaseListener {
+        // Not nice but for tests it's ok
+        private int scenario = 0;
+
+        @Override
+        public void enterFeature(GherkinParser.FeatureContext ctx) {
+            assertEquals("@Featuretag", ctx.featHeader().Tag(0).getText().trim());
+        }
+
+        @Override
+        public void enterScenario(GherkinParser.ScenarioContext ctx) {
+            if(scenario == 0) {
+                scenario ++;
+                assertEquals("@Tag01_test", ctx.Tag(0).getText().trim());
+                assertEquals("@Othertagtest", ctx.Tag(1).getText().trim());
+            }
+        }
+    }
+
+    @Test
+    public void testCorrectParsingTagged() throws Exception {
+        ANTLRInputStream antlrInputStream = new ANTLRInputStream(getClass().getResourceAsStream("tagged.feature"));
+        GherkinLexer lexer = new GherkinLexer(antlrInputStream);
+        GherkinParser parser = new GherkinParser(new CommonTokenStream(lexer));
+        ParseTree tree = parser.feature();
+
+        GherkinListener testListener = new TaggedListener();
         ParseTreeWalker walker = new ParseTreeWalker();
         walker.walk(testListener, tree);
     }
