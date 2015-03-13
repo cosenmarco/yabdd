@@ -1,12 +1,18 @@
 package yabdd.feature.parsing;
 
 import lombok.Getter;
+import org.antlr.v4.runtime.ANTLRInputStream;
+import org.antlr.v4.runtime.CommonTokenStream;
+import org.antlr.v4.runtime.tree.ParseTree;
+import org.antlr.v4.runtime.tree.ParseTreeWalker;
+import org.antlr.v4.runtime.tree.TerminalNode;
 import yabdd.feature.*;
-import yabdd.feature.Package;
 import yabdd.gherkin.GherkinBaseListener;
+import yabdd.gherkin.GherkinLexer;
+import yabdd.gherkin.GherkinListener;
 import yabdd.gherkin.GherkinParser;
 
-import java.io.File;
+import java.io.*;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -15,7 +21,7 @@ import java.util.List;
  * Created by Marco Cosentino on 11/03/15.
  */
 public class Parser {
-    private class GherkinListener extends GherkinBaseListener {
+    private static class FeatureParserListener extends GherkinBaseListener {
         @Getter
         private Feature feature;
 
@@ -30,7 +36,7 @@ public class Parser {
         private List<When> currentWhens;
         private List<Then> currentThens;
 
-        public GherkinListener(Package packg) {
+        public FeatureParserListener(Package packg) {
             this.packg = packg;
         }
 
@@ -48,7 +54,9 @@ public class Parser {
 
         @Override
         public void exitBackground(GherkinParser.BackgroundContext ctx) {
-            backgroundTags = currentTags;
+            for(TerminalNode tag : ctx.Tag()) {
+                backgroundTags.add(new Tag(tag.getText().trim()));
+            }
             backgroundGivens = currentGivens;
         }
 
@@ -99,6 +107,9 @@ public class Parser {
         @Override
         public void exitScenario(GherkinParser.ScenarioContext ctx) {
             String title = ctx.restOfLine().getText().trim();
+            for(TerminalNode tag : ctx.Tag()) {
+                currentTags.add(new Tag(tag.getText().trim()));
+            }
             scenarios.add(new Scenario(currentTags, title, buildDescription(ctx.blockDesc()),
                     currentGivens, currentWhens, currentThens));
         }
@@ -106,6 +117,9 @@ public class Parser {
         @Override
         public void exitOutlineScenario(GherkinParser.OutlineScenarioContext ctx) {
             String title = ctx.restOfLine().getText().trim();
+            for(TerminalNode tag : ctx.Tag()) {
+                currentTags.add(new Tag(tag.getText().trim()));
+            }
             scenarios.add(new Scenario(currentTags, title, buildDescription(ctx.blockDesc()),
                     currentGivens, currentWhens, currentThens));
         }
@@ -127,11 +141,31 @@ public class Parser {
             for(GherkinParser.FeatDescContext featDescCtx : ctx.featHeader().featDesc()) {
                 description.append(featDescCtx.restOfLine().getText().trim()).append(" ");
             }
+
+            for(TerminalNode tag : ctx.featHeader().Tag()) {
+                featureTags.add(new Tag(tag.getText().trim()));
+            }
             this.feature = new Feature(featureTags, title, description.toString().trim(), scenarios, packg);
         }
+
+
     }
 
-    public static Feature parse(File featureFile) {
-        return null;
+    public static Feature parse(InputStream featureStream, Package packg) {
+        ANTLRInputStream antlrInputStream;
+        try {
+            antlrInputStream = new ANTLRInputStream(new InputStreamReader(featureStream));
+        } catch(IOException ex) {
+            throw new RuntimeException(ex);
+        }
+        GherkinLexer lexer = new GherkinLexer(antlrInputStream);
+        GherkinParser parser = new GherkinParser(new CommonTokenStream(lexer));
+        ParseTree tree = parser.feature();
+
+        FeatureParserListener listener = new FeatureParserListener(packg);
+        ParseTreeWalker walker = new ParseTreeWalker();
+        walker.walk(listener, tree);
+
+        return listener.getFeature();
     }
 }

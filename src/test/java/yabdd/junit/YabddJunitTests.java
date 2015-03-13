@@ -6,7 +6,7 @@ import org.junit.runner.RunWith;
 import static org.junit.Assert.assertTrue;
 
 /**
- * Created by technics on 28/02/15.
+ * Created by Marco Cosentino on 28/02/15.
  */
 @RunWith(YabddJUnitRunner.class)
 public class YabddJunitTests {

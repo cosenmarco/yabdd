@@ -6,6 +6,12 @@ package yabdd;
  */
 public class YABDD {
 
+    private final Package packg;
+
+    public YABDD(Package packg) {
+        this.packg = packg;
+    }
+
     public void run(RunNotifier notifier) {
         // Build configuration
         // Fetch and build the rules

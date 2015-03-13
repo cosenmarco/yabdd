@@ -11,4 +11,8 @@ import lombok.NonNull;
 public class Tag {
     @NonNull
     private final String tag;
+
+    public String getTagText() {
+        return tag.startsWith("@") ? tag.substring(1) : tag;
+    }
 }

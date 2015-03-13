@@ -10,7 +10,11 @@ import yabdd.YABDD;
  * Created by Marco Cosentino on 28/02/15.
  */
 public class YabddJUnitRunner extends Runner {
-    public YabddJUnitRunner(Class<?> klass) {}
+    private final Package packg;
+
+    public YabddJUnitRunner(Class<?> klass) {
+        this.packg = klass.getPackage();
+    }
 
     @Override
     public Description getDescription() {
@@ -20,7 +24,7 @@ public class YabddJUnitRunner extends Runner {
     @Override
     public void run(RunNotifier runNotifier) {
         yabdd.RunNotifier yabddNotifier = new YabddJUniteRunNotifier(runNotifier);
-        YABDD yabdd = new YABDD();
+        YABDD yabdd = new YABDD(packg);
         yabdd.run(yabddNotifier);
     }
 }
