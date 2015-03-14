@@ -8,10 +8,10 @@ import yabdd.RunNotifier;
  * A RunNotifier implementation that links the events with jUnit
  * Created by Marco Cosentino on 28/02/15.
  */
-public class YabddJUniteRunNotifier implements RunNotifier {
+public class YabddJUnitRunNotifier implements RunNotifier {
     private final org.junit.runner.notification.RunNotifier notifier;
 
-    public YabddJUniteRunNotifier(org.junit.runner.notification.RunNotifier notifier) {
+    public YabddJUnitRunNotifier(org.junit.runner.notification.RunNotifier notifier) {
         this.notifier = notifier;
     }
 

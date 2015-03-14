@@ -13,7 +13,7 @@ import static org.junit.Assert.assertEquals;
 public class ParserTest {
     @Test
     public void parserTest () {
-        Feature resultFeature = Parser.parse(getClass().getResourceAsStream("test.feature"), getClass().getPackage());
+        Feature resultFeature = Parser.parse(getClass().getResourceAsStream("test.feature"), "test.feature");
 
         assertEquals("FeatTag", resultFeature.getTags().get(0).getTagText());
         assertEquals("Feature Title", resultFeature.getTitle());

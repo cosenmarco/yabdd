@@ -6,6 +6,8 @@ import org.antlr.v4.runtime.CommonTokenStream;
 import org.antlr.v4.runtime.tree.ParseTree;
 import org.antlr.v4.runtime.tree.ParseTreeWalker;
 import org.antlr.v4.runtime.tree.TerminalNode;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import yabdd.feature.*;
 import yabdd.gherkin.GherkinBaseListener;
 import yabdd.gherkin.GherkinLexer;
@@ -21,11 +23,13 @@ import java.util.List;
  * Created by Marco Cosentino on 11/03/15.
  */
 public class Parser {
+    private static final Logger LOG = LoggerFactory.getLogger(Parser.class);
+
     private static class FeatureParserListener extends GherkinBaseListener {
         @Getter
         private Feature feature;
 
-        private final Package packg;
+        private final String resourcePath;
         private List<Tag> featureTags = new ArrayList<Tag>();
         private List<Scenario> scenarios = new ArrayList<Scenario>();
         private List<Given> backgroundGivens;
@@ -36,8 +40,8 @@ public class Parser {
         private List<When> currentWhens;
         private List<Then> currentThens;
 
-        public FeatureParserListener(Package packg) {
-            this.packg = packg;
+        public FeatureParserListener(String resourcePath) {
+            this.resourcePath = resourcePath;
         }
 
         private void resetScenario() {
@@ -145,13 +149,13 @@ public class Parser {
             for(TerminalNode tag : ctx.featHeader().Tag()) {
                 featureTags.add(new Tag(tag.getText().trim()));
             }
-            this.feature = new Feature(featureTags, title, description.toString().trim(), scenarios, packg);
+            this.feature = new Feature(featureTags, title, description.toString().trim(), scenarios, resourcePath);
         }
 
 
     }
 
-    public static Feature parse(InputStream featureStream, Package packg) {
+    public static Feature parse(InputStream featureStream, String resourcePath) {
         ANTLRInputStream antlrInputStream;
         try {
             antlrInputStream = new ANTLRInputStream(new InputStreamReader(featureStream));
@@ -162,10 +166,12 @@ public class Parser {
         GherkinParser parser = new GherkinParser(new CommonTokenStream(lexer));
         ParseTree tree = parser.feature();
 
-        FeatureParserListener listener = new FeatureParserListener(packg);
+        FeatureParserListener listener = new FeatureParserListener(resourcePath);
         ParseTreeWalker walker = new ParseTreeWalker();
         walker.walk(listener, tree);
 
-        return listener.getFeature();
+        Feature result = listener.getFeature();
+        LOG.debug("Parsed feature {}", result);
+        return result;
     }
 }

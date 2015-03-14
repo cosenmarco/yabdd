@@ -10,10 +10,10 @@ import yabdd.YABDD;
  * Created by Marco Cosentino on 28/02/15.
  */
 public class YabddJUnitRunner extends Runner {
-    private final Package packg;
+    private final YABDD yabdd;
 
     public YabddJUnitRunner(Class<?> klass) {
-        this.packg = klass.getPackage();
+        yabdd = new YABDD(klass);
     }
 
     @Override
@@ -23,8 +23,7 @@ public class YabddJUnitRunner extends Runner {
 
     @Override
     public void run(RunNotifier runNotifier) {
-        yabdd.RunNotifier yabddNotifier = new YabddJUniteRunNotifier(runNotifier);
-        YABDD yabdd = new YABDD(packg);
+        yabdd.RunNotifier yabddNotifier = new YabddJUnitRunNotifier(runNotifier);
         yabdd.run(yabddNotifier);
     }
 }

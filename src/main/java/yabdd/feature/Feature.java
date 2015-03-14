@@ -17,13 +17,13 @@ public class Feature {
     @NonNull private final String title;
     @NonNull private final String description;
     @NonNull private final ImmutableList<Scenario> scenarios;
-    @NonNull private final Package packg;
+    @NonNull private final String resourcePath;
 
-    public Feature(List<Tag> tags, String title, String description, List<Scenario> scenarios, Package packg) {
+    public Feature(List<Tag> tags, String title, String description, List<Scenario> scenarios, String resourcePath) {
         this.tags = ImmutableList.copyOf(tags);
         this.title = title;
         this.description = description;
         this.scenarios = ImmutableList.copyOf(scenarios);
-        this.packg = packg;
+        this.resourcePath = resourcePath;
     }
 }
