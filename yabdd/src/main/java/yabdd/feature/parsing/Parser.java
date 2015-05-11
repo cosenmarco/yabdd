@@ -16,6 +16,7 @@ import yabdd.gherkin.GherkinParser;
 
 import java.io.*;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 /**
@@ -32,7 +33,7 @@ public class Parser {
         private final String resourcePath;
         private List<Tag> featureTags = new ArrayList<Tag>();
         private List<Scenario> scenarios = new ArrayList<Scenario>();
-        private List<Given> backgroundGivens;
+        private List<Given> backgroundGivens = Collections.emptyList();
         private List<Tag> backgroundTags = new ArrayList<Tag>();
 
         private List<Tag> currentTags;
