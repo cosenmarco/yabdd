@@ -104,35 +104,30 @@ public class YABDD {
         for(Feature feature : features) {
 
             for(Scenario scenario : feature.getScenarios()) {
-                RulePackage featurePackage = RulePackage.fromResourcePath(feature.getResourcePath());
                 ScenarioContext context = new ScenarioContext(feature, scenario);
-                Description featureDesc = new Description(context);
-                notifier.fireTestStarted(featureDesc);
-                AbstractRule currentRule = null;
+                notifier.fireTestStarted(context);
                 try {
                     for (yabdd.feature.Given given : scenario.getGivens()) {
-                        currentRule = given;
-                        runRule(context, ruleStore, given, featurePackage, RuleType.GIVEN);
+                        runRule(context, ruleStore, given, RuleType.GIVEN);
                     }
                     for (yabdd.feature.When when : scenario.getWhens()) {
-                        currentRule = when;
-                        runRule(context, ruleStore, when, featurePackage, RuleType.WHEN);
+                        runRule(context, ruleStore, when, RuleType.WHEN);
                     }
                     for (yabdd.feature.Then then : scenario.getThens()) {
-                        currentRule = then;
-                        runRule(context, ruleStore, then, featurePackage, RuleType.THEN);
+                        runRule(context, ruleStore, then, RuleType.THEN);
                     }
-                    notifier.fireTestFinished(featureDesc);
+                    notifier.fireTestFinished(context);
                 } catch (Exception e) {
-                    notifier.fireTestFailure(new Failure(featureDesc, e));
+                    notifier.fireTestFailure(context, e);
                 }
             }
         }
     }
 
     private void runRule(ScenarioContext context, RulesStore ruleStore, AbstractRule rule,
-                         RulePackage featurePackage, RuleType ruleType) throws Exception {
+                         RuleType ruleType) throws Exception {
 
+        RulePackage featurePackage = context.getFeature().getPackg();
         RuleMatch ruleMatch = ruleStore.matchRuleBy(featurePackage, ruleType, rule.getBody());
 
         if(ruleMatch != null) {
@@ -141,7 +136,10 @@ public class YABDD {
                 ruleMatch.getMatchedRule().execute(context);
             } catch (InvocationTargetException e) {
                 if(e.getCause() != null && e.getCause() instanceof AssertionError){
-                    throw (Exception) e.getCause();
+                    AssertionError error = (AssertionError) e.getCause();
+                    LOG.error("Rule '{} {}' asserted something wrong", ruleType.getTypeString(),
+                            rule.getBody(), error);
+                    throw error;
                 } else {
                     throw e;
                 }

@@ -1,5 +1,6 @@
 package yabdd.rules;
 
+import com.google.common.base.CaseFormat;
 import yabdd.annotations.Given;
 import yabdd.annotations.Then;
 import yabdd.annotations.When;
@@ -19,5 +20,9 @@ public enum RuleType {
 
     Class<?> getAnnotationClass() {
         return klass;
+    }
+
+    public String getTypeString() {
+        return CaseFormat.UPPER_UNDERSCORE.to(CaseFormat.UPPER_CAMEL, this.name());
     }
 }

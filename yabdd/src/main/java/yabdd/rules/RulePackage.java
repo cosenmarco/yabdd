@@ -1,5 +1,6 @@
 package yabdd.rules;
 
+import com.google.common.base.Joiner;
 import com.google.common.collect.ImmutableList;
 import lombok.Data;
 
@@ -22,7 +23,15 @@ public class RulePackage {
 
     public static RulePackage fromResourcePath(String resourcePath) {
         int lastSlash = resourcePath.lastIndexOf('/');
-        String[] pathParts = resourcePath.substring(0, lastSlash).split("/");
-        return new RulePackage(pathParts);
+        if(lastSlash >= 0) {
+            String[] pathParts = resourcePath.substring(0, lastSlash).split("/");
+            return new RulePackage(pathParts);
+        } else {
+            return new RulePackage(new String[]{});
+        }
+    }
+
+    public String getName() {
+        return Joiner.on(".").join(parts);
     }
 }

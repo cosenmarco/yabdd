@@ -13,6 +13,7 @@ import yabdd.gherkin.GherkinBaseListener;
 import yabdd.gherkin.GherkinLexer;
 import yabdd.gherkin.GherkinListener;
 import yabdd.gherkin.GherkinParser;
+import yabdd.rules.RulePackage;
 
 import java.io.*;
 import java.util.ArrayList;
@@ -29,8 +30,9 @@ public class Parser {
     private static class FeatureParserListener extends GherkinBaseListener {
         @Getter
         private Feature feature;
+        private final RulePackage resourcePath;
+        private final String featName;
 
-        private final String resourcePath;
         private List<Tag> featureTags = new ArrayList<Tag>();
         private List<Scenario> scenarios = new ArrayList<Scenario>();
         private List<Given> backgroundGivens = Collections.emptyList();
@@ -41,8 +43,9 @@ public class Parser {
         private List<When> currentWhens;
         private List<Then> currentThens;
 
-        public FeatureParserListener(String resourcePath) {
-            this.resourcePath = resourcePath;
+        public FeatureParserListener(RulePackage packg, String featName) {
+            this.resourcePath = packg;
+            this.featName = featName;
         }
 
         private void resetScenario() {
@@ -150,7 +153,8 @@ public class Parser {
             for(TerminalNode tag : ctx.featHeader().Tag()) {
                 featureTags.add(new Tag(tag.getText().trim()));
             }
-            this.feature = new Feature(featureTags, title, description.toString().trim(), scenarios, resourcePath);
+            this.feature = new Feature(featureTags, title, description.toString().trim(), scenarios,
+                    resourcePath, featName);
         }
 
 
@@ -167,7 +171,25 @@ public class Parser {
         GherkinParser parser = new GherkinParser(new CommonTokenStream(lexer));
         ParseTree tree = parser.feature();
 
-        FeatureParserListener listener = new FeatureParserListener(resourcePath);
+        RulePackage packg = RulePackage.fromResourcePath(resourcePath);
+
+        int slashPos = resourcePath.lastIndexOf('/');
+        int dotPos = resourcePath.lastIndexOf(".");
+
+        String featName;
+        if(slashPos < 0) {
+            slashPos = 0;
+        }
+        if(dotPos < 0) {
+            dotPos = resourcePath.length();
+        }
+        if(dotPos >= slashPos) {
+            featName = resourcePath.substring(slashPos, dotPos);
+        } else {
+            featName = resourcePath;
+        }
+
+        FeatureParserListener listener = new FeatureParserListener(packg, featName);
         ParseTreeWalker walker = new ParseTreeWalker();
         walker.walk(listener, tree);
 

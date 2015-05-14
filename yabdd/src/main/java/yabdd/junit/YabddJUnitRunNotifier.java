@@ -1,7 +1,8 @@
 package yabdd.junit;
 
-import yabdd.Description;
-import yabdd.Failure;
+import org.junit.runner.Description;
+import org.junit.runner.notification.Failure;
+import yabdd.Context;
 import yabdd.RunNotifier;
 
 /**
@@ -15,23 +16,27 @@ public class YabddJUnitRunNotifier implements RunNotifier {
         this.notifier = notifier;
     }
 
-    @Override
-    public void fireTestStarted(Description description) {
-        notifier.fireTestStarted(org.junit.runner.Description.EMPTY);
+    private Description buildDescription(Context context) {
+        return Description.createSuiteDescription(context.getFeature().getFullName());
     }
 
     @Override
-    public void fireTestFinished(Description description) {
-        notifier.fireTestFinished(org.junit.runner.Description.EMPTY);
+    public void fireTestStarted(Context context) {
+        notifier.fireTestStarted(buildDescription(context));
     }
 
     @Override
-    public void fireTestFailure(Failure failure) {
-        // TODO
+    public void fireTestFinished(Context context) {
+        notifier.fireTestFinished(buildDescription(context));
     }
 
     @Override
-    public void fireTestIgnored(Description description) {
-        // TODO
+    public void fireTestFailure(Context context, Throwable t) {
+        notifier.fireTestFailure(new Failure(buildDescription(context), t));
+    }
+
+    @Override
+    public void fireTestIgnored(Context context) {
+        notifier.fireTestIgnored(buildDescription(context));
     }
 }
