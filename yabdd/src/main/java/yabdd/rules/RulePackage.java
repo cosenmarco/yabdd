@@ -10,8 +10,19 @@ import lombok.Data;
 @Data
 public class RulePackage {
     private final ImmutableList<String> parts;
+
     public RulePackage(String packageName) {
         String[] localParts = packageName.split("\\.");
         parts = ImmutableList.copyOf(localParts);
+    }
+
+    public RulePackage(String[] pathParts) {
+        parts = ImmutableList.copyOf(pathParts);
+    }
+
+    public static RulePackage fromResourcePath(String resourcePath) {
+        int lastSlash = resourcePath.lastIndexOf('/');
+        String[] pathParts = resourcePath.substring(0, lastSlash).split("/");
+        return new RulePackage(pathParts);
     }
 }

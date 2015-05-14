@@ -13,4 +13,4 @@ Feature: A linear collection that supports element insertion and removal at both
     Then I pop value C
     And I pop value B
     And I pop value A
-    And The deque is empty
+    And the deque is empty
