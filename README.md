@@ -21,13 +21,19 @@ in src/test/java/dequetest/DequeTest.java:
 ```java
 @RunWith(YabddJUnitRunner.class)
 public class DequeTest {
+    private Context context;
+
+    public DequeTest(Context context) {
+        this.context = context;
+    }
+
     @Given("an empty Deque")
-    public static void givenAnEmptyDeque(Context context) {
+    public void givenAnEmptyDeque() {
         context.put("deque", new ArrayDeque<String>());
     }
 
     @Then("the deque is empty")
-    public static void theDequeIsEmpty(Context context) {
+    public void theDequeIsEmpty() {
         Deque<String> testDeque = (Deque<String>) context.get("deque");
         assertTrue(testDeque.isEmpty());
     }
@@ -37,17 +43,23 @@ public class DequeTest {
 in src/test/java/dequetest/fifo/DequeFifoRules.java:
 ```java
 public class DequeFifoRules {
+    private Context context;
+
+    public DequeFifoRules(Context context) {
+        this.context = context;
+    }
+
     @When("I add value (.*)")
-    public static void whenIPushValue(Context context) {
+    public void whenIPushValue(String value) {
         Deque<String> testDeque = (Deque<String>) context.get("deque");
-        testDeque.add(context.getRuleCapture(0));
+        testDeque.add(value);
     }
 
     @Then("I remove value (.*)")
-    public static void thenIPopValue(Context context) {
+    public void thenIPopValue(String value) {
         Deque<String> testDeque = (Deque<String>) context.get("deque");
         String removedValue = testDeque.remove();
-        assertEquals(context.getRuleCapture(0), removedValue);
+        assertEquals(value, removedValue);
     }
 }
 ```
@@ -70,7 +82,8 @@ While being all of them great pieces of software I personally find no framework 
 - Uses Java annotations to mark rule methods and to define what they match in the features (pretty much like Cucumber and jBehave)
 - Each feature file belongs to a Java package. The rules are matched according to the packages structure.
 - The feature files are crawled within the classpath. Feature's package is inferred by the resource's path (eg. "com/mycompany/project/subproject/package/Awesome.feature" belongs to package com.mycompany.project.subproject.package).
-- Rules accept Context objects as parameters. This enables rules to communicate with each other and to extract information about the context in which they are running
+- Rule classes can accept Context objects at construction. This enables rules to communicate with each other and to extract information about the context in which they are running supporting easy reusability of rules.
+- Upon execution rules are injected the captures from the matching process accordingly to the rule's method signature.
 - Provides some pre-implemented rules that belong to package "/" that aim to be very generic and re-usable in several different occasions
 
 
@@ -82,6 +95,6 @@ While being all of them great pieces of software I personally find no framework 
 
 ## Concepts
 - A jUnit test suite is generated for each Scenario.
-- Each rule method must accept the injection of a Context instance which is reset on every Scenario execution.
+- Each rule class can accept the injection of a Context instance which is created on every Scenario execution.
 - The Context object contains facilities for storing objects within the Context which can be used by subsequent rules within the execution of a Scenario.
 
