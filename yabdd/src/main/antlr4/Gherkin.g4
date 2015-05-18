@@ -17,7 +17,7 @@ featBody: background? (scenario | outlineScenario)+;
 
 background: (Space | NewLine)* Tag* Background restOfLine NewLine+ blockDesc* given;
 blockDesc: ~(Given) restOfLine NewLine+ ;
-blockBody: given? when then;
+blockBody: given? when? then;
 
 scenario: (Space | NewLine)* Tag* Scenario restOfLine NewLine+  blockDesc* blockBody;
 outlineScenario: (Space | NewLine)* Tag* ScenarioOutline restOfLine NewLine+ blockDesc* blockBody;

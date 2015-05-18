@@ -9,10 +9,7 @@ import yabdd.annotations.When;
 import yabdd.annotations.Then;
 
 import java.lang.annotation.Annotation;
-import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
-import java.lang.reflect.Modifier;
-import java.lang.reflect.Type;
+import java.lang.reflect.*;
 import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -35,22 +32,32 @@ public class Rule {
     @Getter
     private final String value;
 
+    private transient Constructor<?> defaultConstructor;
+    private transient Constructor<?> contextConstructor;
+    private transient Class<?> klass;
+
     public Rule(RuleType type, Method theMethod) {
         this.type = type;
         this.theMethod = theMethod;
 
-        // Sanity checks
-        if( ! Modifier.isStatic(theMethod.getModifiers()) ) {
-            throw new IllegalArgumentException("The annotated method " + getFullMethodName(theMethod) +
-                    " should be static");
-        }
-        Type[] parameterTypes =  theMethod.getGenericParameterTypes();
-        if( parameterTypes.length != 1 || ! parameterTypes[0].equals(Context.class)) {
-            throw new IllegalArgumentException("The annotated method " + getFullMethodName(theMethod) +
-                    " should accept only one parameter of type yabdd.Context");
+        klass = theMethod.getDeclaringClass();
+
+        for( Constructor<?> constructor : klass.getConstructors()) {
+            Class<?>[] parameterTypes = constructor.getParameterTypes();
+            if(parameterTypes.length == 0) {
+                defaultConstructor = constructor;
+            }
+            if(parameterTypes.length == 1 && Context.class.isAssignableFrom(parameterTypes[0])) {
+                contextConstructor = constructor;
+            }
         }
 
-        Class<?> klass = theMethod.getDeclaringClass();
+        // Sanity checks
+        if(defaultConstructor == null && contextConstructor == null) {
+            throw new IllegalArgumentException("The class declaring method " + getFullMethodName(theMethod) +
+            " should implement either the default constructor or a constructor which takes a yabdd.Context object");
+        }
+
         rulePackage = new RulePackage(klass.getPackage().getName());
 
         switch(type) {
@@ -71,8 +78,8 @@ public class Rule {
         }
     }
 
-    private String getFullMethodName(Method aMethod) {
-        return aMethod.getDeclaringClass().getCanonicalName() + "." + theMethod.getName() + "()";
+    private static String getFullMethodName(Method aMethod) {
+        return aMethod.getDeclaringClass().getCanonicalName() + "." + aMethod.getName() + "()";
     }
 
     private transient Pattern pattern;
@@ -92,7 +99,14 @@ public class Rule {
         }
     }
 
-    public void execute(Context context) throws InvocationTargetException, IllegalAccessException {
-        theMethod.invoke(null, context);
+    public void execute(Context context) throws InvocationTargetException, IllegalAccessException,
+            InstantiationException {
+        Object rulesHost;
+        if(contextConstructor != null) {
+            rulesHost = contextConstructor.newInstance(context);
+        } else {
+            rulesHost = defaultConstructor.newInstance();
+        }
+        theMethod.invoke(rulesHost);
     }
 }
