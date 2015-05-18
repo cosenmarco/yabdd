@@ -13,8 +13,8 @@ public class GeneralRules {
     }
 
     @Then("(.*) is thrown")
-    public void someExceptionIsThrown() throws ClassNotFoundException {
-        Class<?> exceptionType = Class.forName(context.getRuleCapture(0));
+    public void someExceptionIsThrown(String exceptionClassName) throws ClassNotFoundException {
+        Class<?> exceptionType = Class.forName(exceptionClassName);
         Object exception = context.get("exception");
         assertNotNull(exception);
         assertTrue(exceptionType.isInstance(exception));

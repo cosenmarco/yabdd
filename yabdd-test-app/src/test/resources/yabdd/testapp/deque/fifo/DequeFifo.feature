@@ -24,6 +24,3 @@ Feature: Deque in FIFO mode
   Scenario: Can use poll without Exception on an empty deque
     Given an empty Deque
     Then I poll null
-
-  Scenario: Peek functionality
-    Given an empty Deque

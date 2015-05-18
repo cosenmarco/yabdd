@@ -20,16 +20,16 @@ public class DequeLifoRules {
     }
 
     @When("I push value (.*)")
-    public void whenIPushValue() {
+    public void whenIPushValue(String value) {
         Deque<String> testDeque = (Deque<String>) context.get("deque");
-        testDeque.push(context.getRuleCapture(0));
+        testDeque.push(value);
     }
 
     @Then("I pop value (.*)")
-    public void thenIPopValue() {
+    public void thenIPopValue(String value) {
         Deque<String> testDeque = (Deque<String>) context.get("deque");
         String poppedValue = testDeque.pop();
-        assertEquals(context.getRuleCapture(0), poppedValue);
+        assertEquals(value, poppedValue);
     }
 
 }

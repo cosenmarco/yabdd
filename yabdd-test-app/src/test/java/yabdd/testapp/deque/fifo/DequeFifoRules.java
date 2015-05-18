@@ -21,16 +21,16 @@ public class DequeFifoRules {
     }
 
     @When("I add value (.*)")
-    public void whenIPushValue() {
+    public void whenIPushValue(String value) {
         Deque<String> testDeque = (Deque<String>) context.get("deque");
-        testDeque.add(context.getRuleCapture(0));
+        testDeque.add(value);
     }
 
     @Then("I remove value (.*)")
-    public void thenIPopValue() {
+    public void thenIPopValue(String value) {
         Deque<String> testDeque = (Deque<String>) context.get("deque");
         String removedValue = testDeque.remove();
-        assertEquals(context.getRuleCapture(0), removedValue);
+        assertEquals(value, removedValue);
     }
 
     @When("I remove a value")

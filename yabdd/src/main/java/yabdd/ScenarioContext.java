@@ -1,9 +1,12 @@
 package yabdd;
 
+import lombok.Getter;
+import lombok.Setter;
 import yabdd.feature.Feature;
 import yabdd.feature.Scenario;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -14,6 +17,9 @@ public class ScenarioContext implements Context {
     private final Map<String, Object> whiteboard;
     private Feature feature;
     private Scenario scenario;
+
+    @Getter
+    @Setter
     private RuleContext ruleContext;
 
     public ScenarioContext(Feature feature, Scenario scenario) {
@@ -43,16 +49,7 @@ public class ScenarioContext implements Context {
     }
 
     @Override
-    public String getRuleCapture(Integer index) {
-        return ruleContext.getCaptures().get(index);
-    }
-
-    @Override
-    public String getRuleContent() {
-        return ruleContext.getContent();
-    }
-
-    protected void setRuleContext(RuleContext ruleContext) {
-        this.ruleContext = ruleContext;
+    public List<String> getRuleCaptures() {
+        return ruleContext.getCaptures();
     }
 }

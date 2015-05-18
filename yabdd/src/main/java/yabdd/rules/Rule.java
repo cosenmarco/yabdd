@@ -4,6 +4,7 @@ import com.google.common.collect.ImmutableList;
 import lombok.Getter;
 import lombok.ToString;
 import yabdd.Context;
+import yabdd.ScenarioContext;
 import yabdd.annotations.Given;
 import yabdd.annotations.When;
 import yabdd.annotations.Then;
@@ -34,6 +35,7 @@ public class Rule {
 
     private transient Constructor<?> defaultConstructor;
     private transient Constructor<?> contextConstructor;
+    private transient Class<?>[] parameterTypes;
     private transient Class<?> klass;
 
     public Rule(RuleType type, Method theMethod) {
@@ -59,6 +61,7 @@ public class Rule {
         }
 
         rulePackage = new RulePackage(klass.getPackage().getName());
+        parameterTypes = theMethod.getParameterTypes();
 
         switch(type) {
             case GIVEN:
@@ -89,9 +92,10 @@ public class Rule {
         }
         Matcher matcher = pattern.matcher(text);
         if(matcher.matches()) {
-            String[] result = new String[matcher.groupCount()];
-            for(int i = 0; i < matcher.groupCount(); i++) {
-                result[i] = matcher.group(i + 1);
+            int matchesCount = matcher.groupCount() + 1;
+            String[] result = new String[matchesCount];
+            for(int i = 0; i < matchesCount; i++) {
+                result[i] = matcher.group(i);
             }
             return ImmutableList.copyOf(result);
         } else {
@@ -99,14 +103,36 @@ public class Rule {
         }
     }
 
-    public void execute(Context context) throws InvocationTargetException, IllegalAccessException,
+    public void execute(ScenarioContext context) throws InvocationTargetException, IllegalAccessException,
             InstantiationException {
         Object rulesHost;
+        Object[] parameters = new Object[parameterTypes.length];
+
         if(contextConstructor != null) {
             rulesHost = contextConstructor.newInstance(context);
         } else {
             rulesHost = defaultConstructor.newInstance();
         }
-        theMethod.invoke(rulesHost);
+
+        List<String> captures = context.getRuleContext().getCaptures();
+
+        // Sanity check
+        assert captures.size() == parameterTypes.length + 1 : "The number of parameters of rule method " +
+                getFullMethodName(theMethod) + " must match the number of effective captures in the rule's regex";
+
+        for(int i = 0; i < parameterTypes.length; i++) {
+            Class<?> parameterType = parameterTypes[i];
+            if(String.class.isAssignableFrom(parameterType)) {
+                parameters[i] = captures.get(i + 1);
+            } else if(Integer.class.isAssignableFrom(parameterType)){
+                parameters[i] = Integer.valueOf(captures.get(i + 1));
+            } else if(Double.class.isAssignableFrom(parameterType)) {
+                parameters[i] = Double.valueOf(captures.get(i + 1));
+            } else {
+                throw new UnsupportedOperationException("Unsupported parameter type for parameter " + (i + 1) +
+                        "  rule method " + getFullMethodName(theMethod));
+            }
+        }
+        theMethod.invoke(rulesHost, parameters);
     }
 }

@@ -37,14 +37,8 @@ public interface Context {
     Object get(String label);
 
     /**
-     * Gives a captured part of the rule's content by index
-     * @param index the index 0 based
-     * @return the part captured from the rule's content
+     * Gives all the captures of the matching process
+     * @return a list of captures. The first capture is always the full matched string
      */
-    String getRuleCapture(Integer index);
-
-    /**
-     * @return the full content of the rule that matched the annotation value
-     */
-    String getRuleContent();
+    List<String> getRuleCaptures();
 }
