@@ -74,7 +74,7 @@ public class Rule {
 
         // Sanity checks
         if(defaultConstructor == null && contextConstructor == null) {
-            throw new IllegalArgumentException("The class declaring method " + getFullMethodName(theMethod) +
+            throw new IllegalArgumentException("The class declaring method " + RuleHelper.getFullMethodName(theMethod) +
             " should implement either the default constructor or a constructor which takes a yabdd.Context object");
         }
 
@@ -96,10 +96,6 @@ public class Rule {
             default:
                 this.value = "";
         }
-    }
-
-    private static String getFullMethodName(Method aMethod) {
-        return aMethod.getDeclaringClass().getCanonicalName() + "." + aMethod.getName() + "()";
     }
 
     private transient Pattern pattern;
@@ -132,22 +128,18 @@ public class Rule {
         }
 
         List<String> captures = context.getRuleContext().getCaptures();
+        String fullName = RuleHelper.getFullMethodName(theMethod);
 
         // Sanity check
         assert captures.size() == parameterTypes.length + 1 : "The number of parameters of rule method " +
-                getFullMethodName(theMethod) + " must match the number of effective captures in the rule's regex";
+                fullName + " must match the number of effective captures in the rule's regex";
 
         for(int i = 0; i < parameterTypes.length; i++) {
-            Class<?> parameterType = parameterTypes[i];
-            if(String.class.isAssignableFrom(parameterType)) {
-                parameters[i] = captures.get(i + 1);
-            } else if(Integer.class.isAssignableFrom(parameterType)){
-                parameters[i] = Integer.valueOf(captures.get(i + 1));
-            } else if(Double.class.isAssignableFrom(parameterType)) {
-                parameters[i] = Double.valueOf(captures.get(i + 1));
-            } else {
+            try {
+                parameters[i] = RuleHelper.convertMatchBasedOnParameterType(parameterTypes[i], captures.get(i + 1));
+            } catch(UnsupportedOperationException ex) {
                 throw new UnsupportedOperationException("Unsupported parameter type for parameter " + (i + 1) +
-                        "  rule method " + getFullMethodName(theMethod));
+                        " of rule method " + fullName);
             }
         }
         theMethod.invoke(rulesHost, parameters);

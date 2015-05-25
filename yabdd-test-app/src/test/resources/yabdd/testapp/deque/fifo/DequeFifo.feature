@@ -7,10 +7,7 @@ Feature: Deque in FIFO mode
   # Note: text above is copied from javadocs for Deque
 
   Scenario: Can work like a Queue
-    Given an empty Deque
-    When I add value A
-    And I add value B
-    And I add value C
+    Given a Deque with elements A,B,C
     Then I remove value A
     And I remove value B
     And I remove value C

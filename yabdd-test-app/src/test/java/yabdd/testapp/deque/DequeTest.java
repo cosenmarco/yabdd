@@ -8,6 +8,7 @@ import yabdd.junit.YabddJUnitRunner;
 
 import java.util.ArrayDeque;
 import java.util.Deque;
+import java.util.List;
 import java.util.NoSuchElementException;
 
 import static org.junit.Assert.assertNotNull;
@@ -31,4 +32,14 @@ public class DequeTest {
         Deque<String> testDeque = (Deque<String>) context.get("deque");
         assertTrue(testDeque.isEmpty());
     }
+
+    @Given("a Deque with elements (.*)")
+    public void givenADequeWithElements(List<String> elements) {
+        Deque<String> testDeque = new ArrayDeque<String>();
+        for(String element : elements) {
+            testDeque.add(element);
+        }
+        context.put("deque", testDeque);
+    }
+
 }
