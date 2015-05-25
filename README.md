@@ -69,7 +69,7 @@ public class DequeFifoRules {
 I think BDD is a great thing which should be very widely adopted across organizations for two reasons:
 
 1. It makes the behaviour of the software readable and verifiable by non-technical (or non language X aware) people
-2. It helps test developers to write clean, concise and focused tests by abstracting the API under test and by providing a standardstructure for the test.
+2. It helps test developers to write clean, concise and focused tests by abstracting the API under test and by providing a standard structure for the test.
 
 In JVM environment there are some frameworks to write BDD tests and execute them.
 While being all of them great pieces of software I personally find no framework satisfying my requirements. TODO: Explain why.

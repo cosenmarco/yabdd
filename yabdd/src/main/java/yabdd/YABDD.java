@@ -17,6 +17,7 @@ import yabdd.feature.parsing.Parser;
 import yabdd.rules.Rule;
 import yabdd.rules.RulePackage;
 import yabdd.rules.RuleType;
+import yabdd.rules.standard.StandardRules;
 import yabdd.rules.store.RuleMatch;
 import yabdd.rules.store.RulesStore;
 
@@ -63,23 +64,20 @@ public class YABDD {
     private RulesStore fetchAndBuildRules() {
         RulesStore ruleStore = new RulesStore();
 
-        Set<Method> givenMethods = reflections.getMethodsAnnotatedWith(Given.class);
-        for(Method givenMethod : givenMethods) {
-            ruleStore.registerRule(new Rule(RuleType.GIVEN, givenMethod));
-        }
+        fetchAndBuildStandardRules(ruleStore);
 
-        Set<Method> whenMethods = reflections.getMethodsAnnotatedWith(When.class);
-        for(Method method : whenMethods) {
-            ruleStore.registerRule(new Rule(RuleType.WHEN, method));
-        }
+        YABDDHelper.findAndRegisterRulesForAnnotation(ruleStore, reflections, Given.class);
+        YABDDHelper.findAndRegisterRulesForAnnotation(ruleStore, reflections, When.class);
+        YABDDHelper.findAndRegisterRulesForAnnotation(ruleStore, reflections, Then.class);
 
-        Set<Method> thenMethods = reflections.getMethodsAnnotatedWith(Then.class);
-        for(Method method : thenMethods) {
-            ruleStore.registerRule(new Rule(RuleType.THEN, method));
-        }
-
-        LOG.debug("Rules Store: {}", ruleStore);
+        LOG.debug("Rules Store after finding all rules: {}", ruleStore);
         return ruleStore;
+    }
+
+    private void fetchAndBuildStandardRules(RulesStore ruleStore) {
+        for(Method method : StandardRules.class.getDeclaredMethods()) {
+            YABDDHelper.registerStandardRuleMethod(ruleStore, method);
+        }
     }
 
     private ImmutableList<Feature> fetchAndParseFeatures() {
@@ -146,6 +144,7 @@ public class YABDD {
             }
         } else {
             LOG.error("Cannot find any rule matching {}", rule);
+            throw new RuntimeException("Rule " + rule.toString() + " cannot be matched");
         }
     }
 }

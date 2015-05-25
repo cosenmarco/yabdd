@@ -19,19 +19,19 @@ import java.util.regex.Pattern;
  * Represents a "rule method" in a form we can work with
  * Created by Marco Cosentino on 03/04/15.
  */
-@ToString
+@ToString(of = {"type", "value", "rulePackage"})
 public class Rule {
     @Getter
-    private final RuleType type;
+    private RuleType type;
 
     @Getter
-    private final Method theMethod;
+    private Method theMethod;
 
     @Getter
-    private final RulePackage rulePackage;
+    private String value;
 
     @Getter
-    private final String value;
+    private RulePackage rulePackage;
 
     private transient Constructor<?> defaultConstructor;
     private transient Constructor<?> contextConstructor;
@@ -43,7 +43,25 @@ public class Rule {
         this.theMethod = theMethod;
 
         klass = theMethod.getDeclaringClass();
+        rulePackage = new RulePackage(klass.getPackage().getName());
 
+        init();
+    }
+
+    /**
+     * This constructor allows to override the package
+     */
+    public Rule(RuleType type, RulePackage packg, Method theMethod) {
+        this.type = type;
+        this.theMethod = theMethod;
+
+        klass = theMethod.getDeclaringClass();
+        rulePackage = packg;
+
+        init();
+    }
+
+    private void init() {
         for( Constructor<?> constructor : klass.getConstructors()) {
             Class<?>[] parameterTypes = constructor.getParameterTypes();
             if(parameterTypes.length == 0) {
@@ -60,7 +78,6 @@ public class Rule {
             " should implement either the default constructor or a constructor which takes a yabdd.Context object");
         }
 
-        rulePackage = new RulePackage(klass.getPackage().getName());
         parameterTypes = theMethod.getParameterTypes();
 
         switch(type) {

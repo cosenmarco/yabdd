@@ -1,8 +1,11 @@
 package yabdd.rules;
 
 import com.google.common.base.Joiner;
+import com.google.common.base.Splitter;
 import com.google.common.collect.ImmutableList;
 import lombok.Data;
+
+import java.util.Collection;
 
 /**
  * Represents a Package into which the various rules are defined
@@ -10,11 +13,19 @@ import lombok.Data;
  */
 @Data
 public class RulePackage {
+    public static final RulePackage ROOT = new RulePackage((String)null);
+
     private final ImmutableList<String> parts;
 
     public RulePackage(String packageName) {
-        String[] localParts = packageName.split("\\.");
-        parts = ImmutableList.copyOf(localParts);
+        if(packageName != null) {
+            Iterable<String> localParts = Splitter.on('.')
+                    .omitEmptyStrings()
+                    .split(packageName);
+            parts = ImmutableList.copyOf(localParts);
+        } else {
+            parts = ImmutableList.of();
+        }
     }
 
     public RulePackage(String[] pathParts) {
@@ -33,5 +44,14 @@ public class RulePackage {
 
     public String getName() {
         return Joiner.on(".").join(parts);
+    }
+
+    @Override
+    public String toString() {
+        String result = this.getName();
+        if("".equals(result)) {
+            result = "__ROOT__";
+        }
+        return result;
     }
 }

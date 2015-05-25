@@ -17,7 +17,7 @@ public class YabddJUnitRunNotifier implements RunNotifier {
     }
 
     private Description buildDescription(Context context) {
-        return Description.createSuiteDescription(context.getFeature().getFullName());
+        return Description.createSuiteDescription(context.getFeature().getFullName() + " [YABDD Feature]");
     }
 
     @Override

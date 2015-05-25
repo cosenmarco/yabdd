@@ -183,8 +183,8 @@ public class Parser {
         if(dotPos < 0) {
             dotPos = resourcePath.length();
         }
-        if(dotPos >= slashPos) {
-            featName = resourcePath.substring(slashPos, dotPos);
+        if(dotPos > slashPos) {
+            featName = resourcePath.substring(slashPos + 1, dotPos);
         } else {
             featName = resourcePath;
         }
@@ -194,7 +194,7 @@ public class Parser {
         walker.walk(listener, tree);
 
         Feature result = listener.getFeature();
-        LOG.debug("Parsed feature {}", result);
+        LOG.debug("Parsed feature {}", result.getFullName());
         return result;
     }
 }

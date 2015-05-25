@@ -17,7 +17,7 @@ import java.util.List;
  * Created by Marco Cosentino on 21/03/15.
  */
 public class RulesStore {
-    PackageTreeNode rootNode = new PackageTreeNode("");
+    PackageTreeNode rootNode = new PackageTreeNode(null, null);
 
     public void registerRule(Rule rule) {
         PackageTreeNode currentNode = rootNode;
@@ -26,7 +26,7 @@ public class RulesStore {
             if(child != null) {
                 currentNode = child;
             } else {
-                child = new PackageTreeNode(part);
+                child = new PackageTreeNode(part, currentNode);
                 currentNode.addChild(child);
                 currentNode = child;
 
@@ -38,6 +38,9 @@ public class RulesStore {
     public RuleMatch matchRuleBy(RulePackage targetPackage, RuleType type, String text) {
         List<PackageTreeNode> treePath = new ArrayList<PackageTreeNode>();
         PackageTreeNode currentNode = rootNode;
+        treePath.add(rootNode);
+
+        // Walks down the path to the rle's package
         for(String part : targetPackage.getParts()) {
             PackageTreeNode child = currentNode.getChildForPart(part);
             if(child == null) {
@@ -46,6 +49,8 @@ public class RulesStore {
             treePath.add(child);
             currentNode = child;
         }
+
+        // Operates on the reversed path to match the rules first in the more specific package
         List<PackageTreeNode> revTreePath = Lists.reverse(treePath);
         for(PackageTreeNode node : revTreePath) {
             for(Rule rule : node.getRulesInPackage()) {
@@ -58,5 +63,19 @@ public class RulesStore {
             }
         }
         return null;
+    }
+
+    private List<Rule> getAllRules(PackageTreeNode node) {
+        List<Rule> result = new ArrayList<Rule>();
+        for(PackageTreeNode child : node.getChildNodes()) {
+            result.addAll(getAllRules(child));
+        }
+        result.addAll(node.getRulesInPackage());
+        return result;
+    }
+
+    @Override
+    public String toString() {
+        return getAllRules(rootNode).toString();
     }
 }
