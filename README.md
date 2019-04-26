@@ -1,4 +1,7 @@
+Note: UNMAINTAINED. Cucmber for the JVM has evelved and it's my go-to choice for BDD on the JVM
+
 #YABDD
+
 stands for Yet Another Behaviour Driven Development (Java) framework.
 
 ## Intro
